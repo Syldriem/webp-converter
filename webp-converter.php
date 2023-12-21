@@ -7,6 +7,34 @@
  * Author URI:  https://github.com/Syldriem
  */
 
+// creates a menu item in the admin menu under settings
+function webp_plugin_menu()
+{
+    add_options_page('WebP Converter', 'WebP Converter', 'manage_options', 'webp-converter', 'webp_plugin_options');
+}
+add_action('admin_menu', 'webp_plugin_menu');
+
+// creates the html for the settings page
+function webp_plugin_options()
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+    echo '<div class="wrap">';
+    echo '<p>Converts all the images in the Media Library to WebP.</p>';
+    echo '<p>Click the button below to convert all images.</p>';
+    echo '<form method="post" action="">';
+    settings_fields('webp_plugin_options');
+    do_settings_sections('webp_plugin_options');
+    echo '<input name="convert_media_lib" class="button button-primary" type="submit" value="Convert" />';
+    echo '</form>';
+    echo '</div>';
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['convert_media_lib'])) {
+        convert_media_lib();
+    }
+}
+
 function on_handle_upload($file)
 {
 	$type = $file['type'];
@@ -131,27 +159,10 @@ function convert_media_lib() {
 		}
 }
 
-	// Turning each attachment into a promise
-	$promises = [];
+	// Turning each attachment into a webp
 	foreach ($attachments_to_convert as $att) {
-		$promises[] = process_images_async($att);
+        create_webp($att, $att["type"]);
 	}
-
-	// Waiting for all promises to settle
-	Utils::settle($promises)->wait();
-}
-
-function process_images_async($attachment)
-{
-	$promise = Coroutine::of(function () use ($attachment) {
-		try {
-			$value = yield (new FulfilledPromise($file = create_webp($attachment, $attachment["type"])));
-		} catch (Exception $e) {
-			var_export("Error converting " . $e->getMessage() . " to webp.\n");
-		}
-		yield $value;
-	});
-	return $promise;
 }
 
 function delete_webp($file)
