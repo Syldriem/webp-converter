@@ -1,11 +1,15 @@
 <?php
 /*
  * Plugin name: webp-converter
- * Description: Converts all the images in the Media Library to WebP.
+ * Description: Converts all the images in the Media Library to WebP and automatically converts images on upload. Navigate to Settings > WebP Converter to convert all images.
  * Version:     0.0.1
  * Author:      Elliot Down
  * Author URI:  https://github.com/Syldriem
  */
+
+require_once('webp-menu.php');
+
+add_action('admin_menu', 'webp_plugin_menu');
 
 function on_handle_upload($file)
 {

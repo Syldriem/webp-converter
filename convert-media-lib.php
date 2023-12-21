@@ -1,4 +1,6 @@
 <?php
+require_once('webp-converter.php');
+
 function convert_media_lib() {
 	// Getting all attachments
 	$posts = get_posts([
